@@ -1,0 +1,24 @@
+{
+  "name": "redux-thunk-promise",
+  "version": "1.0.0",
+  "description": "封装redux-thunk异步样板代码",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Etoile984816138/redux-thunk-promise.git"
+  },
+  "keywords": [
+    "redux-thunk",
+    "promise",
+    "redux"
+  ],
+  "author": "Etoile",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Etoile984816138/redux-thunk-promise/issues"
+  },
+  "homepage": "https://github.com/Etoile984816138/redux-thunk-promise#readme"
+}
