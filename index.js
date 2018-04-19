@@ -36,18 +36,18 @@ const createMiddleware = () => {
 
 export const asynReducers = (state, status, data) => {
     switch (status) {
-        case 'START':
+        case status.START:
             return {
                 ...state,
                 loading: true
             };
-        case 'SUCCESS':
+        case status.SUCCESS:
             return {
                 ...state,
                 loading: false,
                 ...data
             };
-        case 'ERROR':
+        case status.ERROR:
             return {
                 ...state,
                 loading: false
