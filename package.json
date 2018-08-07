@@ -1,5 +1,5 @@
 {
-  "name": "redux-thunk-async",
+  "name": "redux-thunk-promise-action",
   "version": "1.1.0",
   "description": "封装redux-thunk异步样板代码",
   "main": "index.js",
