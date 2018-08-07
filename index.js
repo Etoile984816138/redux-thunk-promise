@@ -1,17 +1,29 @@
+/** 
+ * @file 创建一个基于redux-thunk的中间件
+ * @description 对redux-thunk的promise请求进行再次封装，使action可以像同步代码一样写
+ */
+
 const status = {
     START: 'START',
     SUCCESS: 'SUCCESS',
     ERROR: 'ERROR'
 }
 
-const asynAction = (dispatch, type, req) => {
+const unset = (obj, prop) => {
+    const result = Object.assign({}, obj);
+    delete result[prop];
+    return result;
+}
+
+const asynAction = (dispatch, action) => {
+    const { type, request } = action;
     dispatch({
         type,
         status: status.START
     });
-    return req().then(resp => {
+    return request().then(resp => {
         dispatch({
-            type,
+            ...unset(action, 'request'),
             status: status.SUCCESS,
             resp
         });
@@ -21,21 +33,14 @@ const asynAction = (dispatch, type, req) => {
             type,
             status: status.ERROR
         });
-        return err;
+        throw err;
     });
 
 };
-const createMiddleware = () => {
-    return ({ dispatch }) => next => action => {
-        if (action.request) {
-            return asynAction(dispatch, action.type, action.request)
-        }
-        return next(action);
-    }
-}
 
-export const asynReducers = (state, status, data) => {
-    switch (status) {
+export const asynReducers = (state, action, data = ()=>({})) => {
+    const crtStatus = action.status;
+    switch (crtStatus) {
         case status.START:
             return {
                 ...state,
@@ -45,7 +50,7 @@ export const asynReducers = (state, status, data) => {
             return {
                 ...state,
                 loading: false,
-                ...data
+                ...data()
             };
         case status.ERROR:
             return {
@@ -53,7 +58,16 @@ export const asynReducers = (state, status, data) => {
                 loading: false
             };
     }
-}
+};
+
+const createMiddleware = () => {
+    return ({ dispatch }) => next => action => {
+        if (typeof (action.request) === 'function') {
+            return asynAction(dispatch, action)
+        }
+        return next(action);
+    }
+};
 
 const middleware = createMiddleware();
 

@@ -1,4 +1,4 @@
-# redux-thunk-promise
+# redux-thunk-async
 
 对redux-thunk异步Action的一个简单封装，减少样板代码。
 
@@ -11,7 +11,7 @@ redux-thunk虽然可以满足我们对异步Action的大部分需求，但比较
 ``` js
 import { createStore, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
-import promiseMiddleware from 'redux-thunk-promise';
+import promiseMiddleware from 'redux-thunk-async';
 import reducers from './reducers';
 
 // middlewares
@@ -38,29 +38,50 @@ export default createAppStore;
 
 ```
 
-#### 2. Action
+#### 2. Action Creator
 ``` js
-export const getList = (param) => ({
+export const getList = (payload) => ({
     type: types.GET_LIST,
-    request: () => api.getList(param)
+    request: () => api.getList(payload),
+    payload
 });
 ```
-api.getList为封装的fetch请求方法，返回promise对象。redux-thunk-promise中会判断request属性是否存在，存在则执行asynAction方法处理异步action，否则继续传递action到下个中间件。
+
+注意action参数中fetch方法需要使用request作为变量名，redux-thunk-async内部会判断action.request是否为function，是则判断为异步请求，否则为正常请求，数据流转到下一个中间件。api.getList为封装的fetch请求方法，返回promise对象。
+
+属性 | 说明 
+---- | --- 
+type | 异步要执行的动作常量 
+request |  fetch方法
+payload |  action参数
 
 #### 3. reducer
+
+reducer中可以使用中间件所提供的asynReducers方法，在异步请求各个阶段为state添加相应数据，如loading等。当然也可以不引入自己写reducer。
+
 ``` js
-import { asynReducers } from 'redux-thunk-promise';
+import { asynReducers } from 'redux-thunk-async';
 
 export default (state = initialState, action) => {
     switch (action.type) {
         case types.GET_LIST:
-            return asynReducers(state, action.status, action.resp ? {
-                list: action.resp.data.list,
-                totalCount: action.resp.data.count
-            } : {});
+            return {
+                ...asynReducers(state, action, () => ({
+                    list: action.resp.data
+                }))
+            }
         default:
             return state;
     }
 }
 ```
 
+### asynReducers
+#### Syntax 
+asynReducers(state,action,data)
+#### API
+属性 | 说明 
+---- | --- 
+state | 当前state 
+action |  当前action
+data |  success时需修改的state业务数据
